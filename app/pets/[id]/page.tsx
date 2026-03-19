@@ -1,21 +1,24 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MOCK_PETS } from "@/data/pets";
 import type { Pet } from "@/data/pets";
+import { PetImage } from "@/components/PetImage";
 
 interface PetPageProps {
-  params: {
+  // Next.js can provide `params` as a Promise in some dynamic route cases.
+  // We unwrap it below to avoid runtime errors.
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 function getPet(id: string): Pet | undefined {
   return MOCK_PETS.find((pet) => pet.id === id);
 }
 
-export default function PetDetailsPage({ params }: PetPageProps) {
-  const pet = getPet(params.id);
+export default async function PetDetailsPage({ params }: PetPageProps) {
+  const { id } = await params;
+  const pet = getPet(id);
   if (!pet) return notFound();
 
   const similar = MOCK_PETS.filter(
@@ -36,7 +39,7 @@ export default function PetDetailsPage({ params }: PetPageProps) {
       <section className="fade-in mt-5 grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-start">
         <div className="space-y-5">
           <div className="relative overflow-hidden rounded-3xl bg-slate-100">
-            <Image
+            <PetImage
               src={pet.imageUrl}
               alt={pet.name}
               width={900}
@@ -178,7 +181,7 @@ export default function PetDetailsPage({ params }: PetPageProps) {
                     className="flex items-center gap-3 rounded-2xl bg-slate-50/70 p-2.5 text-xs text-slate-700 transition hover:bg-slate-100"
                   >
                     <div className="h-10 w-10 overflow-hidden rounded-2xl bg-slate-100">
-                      <Image
+                      <PetImage
                         src={other.imageUrl}
                         alt={other.name}
                         width={80}
